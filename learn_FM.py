@@ -8,16 +8,17 @@ from nn_lib import (
     load_network,
 )
 from illustrate import illustrate_results_FM
+from sklearn.metrics import mean_squared_error
 
 
-def main():
+def main(_neurons, _activationFunctions, _batchSize, _learningRate, _numberOfEpochs):
     dataset = np.loadtxt("FM_dataset.dat")
     #######################################################################
     #                       ** START OF YOUR CODE **
     #######################################################################
-    input_dim = 3
-    neurons = [10, 3]
-    activations = ["relu", "sigmoid"]
+    input_dim = 3       # CONSTANT: Stated in specification
+    neurons = _neurons
+    activations = _activationFunctions
     net = MultiLayerNetwork(input_dim, neurons, activations)
 
     np.random.shuffle(dataset)
@@ -39,9 +40,9 @@ def main():
 
     trainer = Trainer(
         network=net,
-        batch_size=8,
-        nb_epoch=1000,
-        learning_rate=0.01,
+        batch_size=_batchSize,
+        nb_epoch=_numberOfEpochs,
+        learning_rate=_learningRate,
         loss_fun="cross_entropy",
         shuffle_flag=True,
     )
@@ -54,11 +55,40 @@ def main():
     targets = y_val.argmax(axis=1).squeeze()
     accuracy = (preds == targets).mean()
     print("Validation accuracy: {}".format(accuracy))
+    print("Mean squared error:", evaluate_architecture(targets, preds))
     #######################################################################
     #                       ** END OF YOUR CODE **
     #######################################################################
-    illustrate_results_FM(net, prep)
+    # illustrate_results_FM(net, prep)
+
+def evaluate_architecture(y_true, y_pred):
+    return mean_squared_error(y_true, y_pred)
 
 
 if __name__ == "__main__":
-    main()
+    # Set hyperparameters for main()
+    neurons = []
+    activationFunctions = [] 
+
+    # Modify any of the following hyperparameters     
+    numOfHiddenLayers = 3               # Does not count input/output layer
+    numOfNeuronsPerHiddenLayer = 5
+    defaultActivation = "relu"          # Does not apply for input/output layer
+    batchSize = 1000
+    learningRate = 0.01
+    numberOfEpochs = 1000
+
+    # Optional: Set number of neurons in hidden layers based on hyperparameters
+    # This results in all hidden layers having the same number of neurons (except output layer)
+    for i in range(numOfHiddenLayers):
+        neurons.append(numOfNeuronsPerHiddenLayer)
+    neurons.append(3)       # CONSTANT: For the output layer
+
+    # Optional: Set activation functions in hidden layers based on hyperparameters
+    # This results in all hidden layers having the same activation functions (except output layer)
+    for i in range(numOfHiddenLayers):
+        activationFunctions.append(defaultActivation)
+    activationFunctions.append("sigmoid")       # For the output layer
+
+    # Call the main function to train and evaluate the neural network
+    main(neurons, activationFunctions, batchSize, learningRate, numberOfEpochs)

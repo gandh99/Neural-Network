@@ -496,6 +496,12 @@ class Trainer(object):
 
                 # Updates parameters of the network via gradient descent
                 self.network.update_params(self.learning_rate)
+
+            # Optional: Print epoch progress for every 10% completed
+            if epoch != 0 and epoch % (self.nb_epoch / 10) == 0:
+                print("Completed", epoch, "of", self.nb_epoch, "epochs.")
+            if epoch == self.nb_epoch - 1:
+                print("Completed", self.nb_epoch, "of", self.nb_epoch, "epochs.")
         #######################################################################
         #                       ** END OF YOUR CODE **
         #######################################################################
