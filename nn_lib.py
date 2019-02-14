@@ -585,7 +585,7 @@ class Preprocessor(object):
         #                       ** START OF YOUR CODE **
         #######################################################################
         originalData = data
-        for col in originalData.T:
+        for col in range(originalData.shape[1]):
             originalData.T[col] = (originalData.T[col]) * (self.arrayOfMaximums[col] - self.arrayOfMinimums[col]) + self.arrayOfMinimums[col]
         
         return originalData
