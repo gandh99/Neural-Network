@@ -44,6 +44,7 @@ def illustrate_results_FM(network, prep, nb_pos=10):
         (np.random.rand(nb_pos + 1, 6) * 2 - 1) * np.pi / 2
     )  # generating 10 cols to match length of dataset, but only the first 3 are used.
     data[0, :] = 0
+
     data = prep.apply(data)
     results = network(data[1:, 0:3])
     robot = RobotArm()
