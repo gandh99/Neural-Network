@@ -1,5 +1,6 @@
 import numpy as np
 import pickle
+import math
 
 
 def xavier_init(size, gain=1.0):
@@ -390,8 +391,8 @@ class Trainer(object):
         batch_size,
         nb_epoch,
         learning_rate,
-        loss_fun,
-        shuffle_flag,
+        loss_fun = MSELossLayer(),
+        shuffle_flag = False,
     ):
         """Constructor.
 
@@ -477,8 +478,8 @@ class Trainer(object):
             if self.shuffle_flag == True:
                 input_dataset, target_dataset = self.shuffle(input_dataset, target_dataset)
             
-            numOfBatches = input_dataset.shape[0] / self.batch_size
-            for i in range(int(numOfBatches)):
+            numOfBatches = math.ceil(input_dataset.shape[0] / self.batch_size)
+            for i in range(numOfBatches):
                 # Split dataset into batches
                 currentInputBatch = input_dataset[i * self.batch_size: (i + 1) * self.batch_size, :]
                 currentTargetBatch = target_dataset[i * self.batch_size: (i + 1) * self.batch_size, :]
