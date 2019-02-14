@@ -324,7 +324,7 @@ class MultiLayerNetwork(object):
         Performs backward pass through the network.
 
         Arguments:
-            grad_z {np.ndarray} -- Gradient array of shape (1,
+            grad_z {np.ndarray} -- Gradient array of shape (batch_size,
                 #_neurons_in_final_layer).
 
         Returns:
@@ -586,7 +586,7 @@ class Preprocessor(object):
         #######################################################################
         originalData = data
         for col in originalData.T:
-            originalData.T[col] = (originalData.T[col]) * (self.arrayOfMaximums[col] - self.arrayOfMinimumscol) + self.arrayOfMinimums[col]
+            originalData.T[col] = (originalData.T[col]) * (self.arrayOfMaximums[col] - self.arrayOfMinimums[col]) + self.arrayOfMinimums[col]
         
         return originalData
         #######################################################################
