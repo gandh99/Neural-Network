@@ -1,0 +1,3 @@
+no. of hidden layers, no. of neurons per hidden layer, activation function, batch size, learning rate, no. of epochs, accuracy, mse
+4, 5, 'relu', 100, 0.01, 1000, 0.01504, 3.65568
+2, 5, 'relu', 100, 0.01, 1000, 0.01248, 3.67648
