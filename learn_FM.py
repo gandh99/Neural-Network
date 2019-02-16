@@ -12,7 +12,7 @@ from illustrate import illustrate_results_FM
 from sklearn.metrics import mean_squared_error
 
 
-def main(_neurons, _activationFunctions, _batchSize, _learningRate, _numberOfEpochs):
+def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFunction, _batchSize, _learningRate, _numberOfEpochs, _writeToCSV = False):
     dataset = np.loadtxt("FM_dataset.dat")
     #######################################################################
     #                       ** START OF YOUR CODE **
@@ -20,7 +20,7 @@ def main(_neurons, _activationFunctions, _batchSize, _learningRate, _numberOfEpo
     # Setup hyperparameters and neural network
     input_dim = 3       # CONSTANT: Stated in specification
     neurons = _neurons
-    activations = _activationFunctions
+    activations = _activationFunctionHidden
     net = MultiLayerNetwork(input_dim, neurons, activations)
 
     np.random.shuffle(dataset)
@@ -47,7 +47,7 @@ def main(_neurons, _activationFunctions, _batchSize, _learningRate, _numberOfEpo
         batch_size=_batchSize,
         nb_epoch=_numberOfEpochs,
         learning_rate=_learningRate,
-        loss_fun="cross_entropy",
+        loss_fun=_lossFunction,
         shuffle_flag=True,
     )
 
@@ -64,15 +64,16 @@ def main(_neurons, _activationFunctions, _batchSize, _learningRate, _numberOfEpo
     print("Validation accuracy: {}".format(accuracy))
     print("Mean squared error:", mse)
 
-    # Optional: Write results to a csv file
-    with open('FM_results.csv','a') as file:
-        # No. of hidden layers, no. of neurons per hidden layer, activation, batch size, learning rate, number of epochs,
-        # Accuracy, MSE
-        csvList = [len(neurons) - 1, neurons[0], activations[0], _batchSize, 
-            _learningRate, _numberOfEpochs, accuracy, mse]
-        csvRow = str(csvList).strip("[]")
-        csvRow += "\n"
-        file.write(csvRow)
+    if _writeToCSV:
+        # Optional: Write results to a csv file
+        with open('FM_results.csv','a') as file:
+            # No. of hidden layers, no. of neurons per hidden layer, activation, batch size, learning rate, number of epochs,
+            # Accuracy, MSE
+            csvList = [len(neurons) - 1, neurons[0], activations[0], _activationFunctionOutput, _batchSize, 
+                _learningRate, _numberOfEpochs, accuracy, mse]
+            csvRow = str(csvList).strip("[]")
+            csvRow += "\n"
+            file.write(csvRow)
     #######################################################################
     #                       ** END OF YOUR CODE **
     #######################################################################
@@ -88,12 +89,17 @@ if __name__ == "__main__":
     activationFunctions = [] 
 
     # Modify any of the following hyperparameters     
-    numOfHiddenLayers = 2               # Does not count input/output layer
-    numOfNeuronsPerHiddenLayer = 5
-    defaultActivation = "relu"          # Does not apply for input/output layer
-    batchSize = 100
-    learningRate = 0.01
+    numOfHiddenLayers = 3              # Does not count input/output layer
+    numOfNeuronsPerHiddenLayer = 5      # Configures all hidden layers to have the same number of neurons
+    activationHidden = "relu"          # Does not apply for input/output layer
+    activationOutput = "identity"
+    lossFunction = "mse"
+    batchSize = 1000
+    learningRate = 1e-7
     numberOfEpochs = 1000
+
+    # Optional: Write results to csv
+    writeToCSV = True
 
     # Optional: Set number of neurons in hidden layers based on hyperparameters
     # This results in all hidden layers having the same number of neurons (except output layer)
@@ -104,8 +110,8 @@ if __name__ == "__main__":
     # Optional: Set activation functions in hidden layers based on hyperparameters
     # This results in all hidden layers having the same activation functions (except output layer)
     for i in range(numOfHiddenLayers):
-        activationFunctions.append(defaultActivation)
-    activationFunctions.append("sigmoid")       # For the output layer
+        activationFunctions.append(activationHidden)
+    activationFunctions.append(activationOutput)       # For the output layer
 
     # Call the main function to train and evaluate the neural network
-    main(neurons, activationFunctions, batchSize, learningRate, numberOfEpochs)
+    main(neurons, activationFunctions, activationOutput, lossFunction, batchSize, learningRate, numberOfEpochs, writeToCSV)

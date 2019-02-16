@@ -418,7 +418,7 @@ class Trainer(object):
         #######################################################################
         if self.loss_fun == "mse":
             self._loss_layer = MSELossLayer()
-        elif self.loss_fun == "cross_entropy":
+        elif self.loss_fun == "cross_entropy" or self.loss_fun == "bce":
             self._loss_layer = CrossEntropyLossLayer()
         #######################################################################
         #                       ** END OF YOUR CODE **
@@ -489,7 +489,8 @@ class Trainer(object):
 
                 # Compute loss (we assume output has same size as currentTargetBatch)
                 loss = self._loss_layer.forward(output, currentTargetBatch)
-
+                # print(loss)
+                                
                 # Perform backward pass through the network
                 grad_z = self._loss_layer.backward()
                 grad_x = self.network.backward(grad_z)
