@@ -236,6 +236,7 @@ class LinearLayer(Layer):
         #                       ** START OF YOUR CODE **
         #######################################################################
         self._W = self._W - learning_rate * self._grad_W_current
+        self._b = self._b - learning_rate * self._grad_b_current    # Update bias?
         #######################################################################
         #                       ** END OF YOUR CODE **
         #######################################################################
@@ -485,6 +486,7 @@ class Trainer(object):
                 input_dataset, target_dataset = self.shuffle(input_dataset, target_dataset)
             
             numOfBatches = math.ceil(input_dataset.shape[0] / self.batch_size)
+            lossPrint = 0
             for i in range(numOfBatches):
                 # Split dataset into batches
                 currentInputBatch = input_dataset[i * self.batch_size: (i + 1) * self.batch_size, :]
@@ -495,7 +497,7 @@ class Trainer(object):
 
                 # Compute loss (we assume output has same size as currentTargetBatch)
                 loss = self._loss_layer.forward(output, currentTargetBatch)
-                # print(loss)
+                lossPrint += loss
 
                 # Perform backward pass through the network
                 grad_z = self._loss_layer.backward()
@@ -503,6 +505,9 @@ class Trainer(object):
 
                 # Updates parameters of the network via gradient descent
                 self.network.update_params(self.learning_rate)
+
+            # Optional: Print loss after every epoch
+            print(lossPrint / numOfBatches)
 
             # Optional: Print epoch progress for every 10% completed
             if epoch != 0 and epoch % (self.nb_epoch / 10) == 0:

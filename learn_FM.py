@@ -57,8 +57,8 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
     print("Validation loss = ", trainer.eval_loss(x_val_pre, y_val))
 
     # Evaluate the neural network
-    preds = net(x_val_pre).argmax(axis=1).squeeze()
-    targets = y_val.argmax(axis=1).squeeze()
+    preds = net(x_val_pre)
+    targets = y_val
     accuracy = (preds == targets).mean()
     mse = evaluate_architecture(targets, preds)
     print("Validation accuracy: {}".format(accuracy))
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     lossFunction = "mse"
     batchSize = 1000
     learningRate = 1e-7
-    numberOfEpochs = 1000
+    numberOfEpochs = 50000
 
     # Optional: Write results to csv
     writeToCSV = False
