@@ -285,6 +285,9 @@ class MultiLayerNetwork(object):
                     layerActivation = SigmoidLayer()
                 elif self.activations[activationLayerIndex] == "identity":
                     pass
+                else:
+                    raise ValueError("Activation layers must conform to one of the following options: "
+                                        "{'relu,', 'sigmoid', 'identity'}")
                 activationLayerIndex += 1            
         #######################################################################
         #                       ** END OF YOUR CODE **
@@ -420,6 +423,9 @@ class Trainer(object):
             self._loss_layer = MSELossLayer()
         elif self.loss_fun == "cross_entropy" or self.loss_fun == "bce":
             self._loss_layer = CrossEntropyLossLayer()
+        else:
+            raise ValueError("Loss function must conform to one of the following options: "
+                                "{'mse', 'cross_entropy', 'bse'}")
         #######################################################################
         #                       ** END OF YOUR CODE **
         #######################################################################
@@ -490,7 +496,7 @@ class Trainer(object):
                 # Compute loss (we assume output has same size as currentTargetBatch)
                 loss = self._loss_layer.forward(output, currentTargetBatch)
                 # print(loss)
-                                
+
                 # Perform backward pass through the network
                 grad_z = self._loss_layer.backward()
                 grad_x = self.network.backward(grad_z)

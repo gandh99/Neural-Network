@@ -10,3 +10,5 @@ no. of hidden layers, no. of neurons per hidden layer, activation function (hidd
 3, 5, 'relu', 'identity', 1000, 1e-08, 1000, 0.5152, 0.49056
 3, 5, 'relu', 'identity', 1000, 1e-09, 1000, 0.88608, 0.15712
 3, 5, 'relu', 'identity', 1000, 1e-10, 1000, 0.89888, 0.13952
+3, 10, 'relu', 'identity', 1000, 1e-07, 1000, 0.88256, 0.16064
+3, 5, 'relu', 'identity', 1000, 1e-07, 1000, 0.8896, 0.15456

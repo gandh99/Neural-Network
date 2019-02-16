@@ -99,7 +99,7 @@ if __name__ == "__main__":
     numberOfEpochs = 1000
 
     # Optional: Write results to csv
-    writeToCSV = True
+    writeToCSV = False
 
     # Optional: Set number of neurons in hidden layers based on hyperparameters
     # This results in all hidden layers having the same number of neurons (except output layer)
