@@ -59,9 +59,9 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
     # Evaluate the neural network
     preds = net(x_val_pre)
     targets = y_val
-    accuracy = (preds == targets).mean()
+    # accuracy = (preds == targets).mean()
     mse = evaluate_architecture(targets, preds)
-    print("Validation accuracy: {}".format(accuracy))
+    # print("Validation accuracy: {}".format(accuracy))
     print("Mean squared error:", mse)
 
     if _writeToCSV:
@@ -84,9 +84,10 @@ def evaluate_architecture(y_true, y_pred):
 
 
 if __name__ == "__main__":
-    # Set hyperparameters for main()
+    # Setup for the hyperparameters for main()
     neurons = []
     activationFunctions = [] 
+    outputDimension = 3
 
     # Modify any of the following hyperparameters     
     numOfHiddenLayers = 3              # Does not count input/output layer
@@ -95,8 +96,8 @@ if __name__ == "__main__":
     activationOutput = "identity"
     lossFunction = "mse"
     batchSize = 1000
-    learningRate = 1e-7
-    numberOfEpochs = 50000
+    learningRate = 1e-5
+    numberOfEpochs = 10000
 
     # Optional: Write results to csv
     writeToCSV = False
@@ -105,7 +106,7 @@ if __name__ == "__main__":
     # This results in all hidden layers having the same number of neurons (except output layer)
     for i in range(numOfHiddenLayers):
         neurons.append(numOfNeuronsPerHiddenLayer)
-    neurons.append(3)       # CONSTANT: For the output layer
+    neurons.append(outputDimension)       # CONSTANT: For the output layer
 
     # Optional: Set activation functions in hidden layers based on hyperparameters
     # This results in all hidden layers having the same activation functions (except output layer)

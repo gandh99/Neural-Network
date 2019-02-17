@@ -268,6 +268,8 @@ class MultiLayerNetwork(object):
         self._layers = []
         linearLayerIndex = 0
         activationLayerIndex = 0
+        assert(len(neurons) == len(activations))
+
         for i in range(len(self.neurons) + len(self.activations)):
             # Append linear layer to _layers
             if linearLayerIndex == activationLayerIndex:
@@ -277,7 +279,8 @@ class MultiLayerNetwork(object):
                     inputDimension = self.neurons[linearLayerIndex- 1]
                 outputDimension = self.neurons[linearLayerIndex]
                 self._layers.append(LinearLayer(inputDimension, outputDimension))
-                linearLayerIndex += 1    
+                linearLayerIndex += 1 
+
             # Append activation layer to _layers
             else:       
                 if self.activations[activationLayerIndex] == "relu":
@@ -285,11 +288,16 @@ class MultiLayerNetwork(object):
                 elif self.activations[activationLayerIndex] == "sigmoid":
                     layerActivation = SigmoidLayer()
                 elif self.activations[activationLayerIndex] == "identity":
-                    pass
+                    activationLayerIndex += 1     
+                    continue
                 else:
                     raise ValueError("Activation layers must conform to one of the following options: "
                                         "{'relu,', 'sigmoid', 'identity'}")
-                activationLayerIndex += 1            
+                self._layers.append(layerActivation)
+                activationLayerIndex += 1
+
+        # Optional: Print to verify that the layers have been appended correctly
+        # print(self._layers)     
         #######################################################################
         #                       ** END OF YOUR CODE **
         #######################################################################
@@ -507,7 +515,7 @@ class Trainer(object):
                 self.network.update_params(self.learning_rate)
 
             # Optional: Print loss after every epoch
-            print(lossPrint / numOfBatches)
+            # print(lossPrint / numOfBatches)
 
             # Optional: Print epoch progress for every 10% completed
             if epoch != 0 and epoch % (self.nb_epoch / 10) == 0:
