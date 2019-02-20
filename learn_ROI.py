@@ -59,8 +59,6 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
     preds = net(x_val_pre)
     targets = y_val
     evaluate_architecture(targets, preds)
-    # accuracy = evaluate_architecture(targets, preds)
-    # print("Validation accuracy: {}".format(accuracy))
 
     # Optional: Write results to a csv file
     if _writeToCSV:
@@ -80,10 +78,34 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
 # First create the confusion matrix (predicted x expected)
 # Then, evaluate the architecture using accuracy, precision, recall and F1 score
 def evaluate_architecture(y_true, y_pred):
+    # Generate and populate the confusion matrix
     confusionMatrix = populate_confusion_matrix(y_true, y_pred)
-    print(confusionMatrix)
 
-    # Test: Prints the number of occurrences of each index in y_true
+    # Stores data on recall, precision and f1 for each label
+    labelDict = dict.fromkeys({"label1", "label2", "label3", "label4"}) 
+
+    # Compute and store the metrics 
+    index = 0
+    totalErrors = 0
+    numOfRows = y_true.shape[0]
+    for element in labelDict:
+        truePositive, falsePositive, falseNegative = calculate_metrics(confusionMatrix, index)
+        recall = calculate_recall(truePositive, falseNegative)
+        precision = calculate_precision(truePositive, falsePositive)
+        f1 = calculate_f1(recall, precision)
+        totalErrors += falsePositive
+
+        labelDict[element] = {"recall": recall, "precision": precision, "f1": f1}
+        index += 1
+
+    accuracy = calculate_classification_rate(numOfRows, totalErrors)
+
+    # Print results
+    print(confusionMatrix)
+    print(labelDict)
+    print(accuracy)
+
+    # Optional: Prints the number of occurrences of each index in y_true
     indices = np.argmax(y_true, axis=1)
     unique, counts = np.unique(indices, return_counts=True)
     ans = dict(zip(unique, counts))
@@ -111,10 +133,51 @@ def create_confusion_matrix(numOfRows, numOfColumns):
     return matrix
 
 # Given a matrix of values, returns as an array the indices of the maximum value for each row
+# E.g. [0, 1, 0, 0] returns 1
 def extract_indices(data):
     indices = np.argmax(data, axis=1)
 
     return indices
+
+# Metric: true positive, false positive, false negative
+def calculate_metrics(matrix, index):
+    numOfRows = matrix.shape[0]
+    truePositive = matrix[index, index]
+    falsePositive = 0
+    falseNegative = 0
+
+    # Calculate false positive and false negative
+    for currentIndex in range(numOfRows):
+        if currentIndex == index:
+            continue
+        falsePositive += matrix[index, currentIndex]
+        falseNegative += matrix[currentIndex, index]    
+
+    return truePositive, falsePositive, falseNegative
+
+# Metric: recall = true pos / (true pos + false neg)
+def calculate_recall(truePositive, falseNegative):
+    if truePositive + falseNegative == 0:
+        return 0
+    return truePositive / (truePositive + falseNegative)
+
+# Metric: precision = true pos / (true pos + false pos)
+def calculate_precision(truePositive, falsePositive):
+    if truePositive + falsePositive == 0:
+        return 0
+    return truePositive / (truePositive + falsePositive)
+
+# Metric: F1 = 2 * (prec * rec) / (prec + rec)
+def calculate_f1(precision, recall): 
+    if precision + recall == 0:
+        return 0
+    return 2 * (precision * recall) / (precision + recall)
+
+# Metric: classification rate = 1 - classification error
+def calculate_classification_rate(numOfRows, totalErrors):
+    if numOfRows == 0:
+        return 0
+    return (numOfRows - totalErrors) / numOfRows
 
 
 if __name__ == "__main__":
