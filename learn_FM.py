@@ -59,18 +59,16 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
     # Evaluate the neural network
     preds = net(x_val_pre)
     targets = y_val
-    # accuracy = (preds == targets).mean()
     mse = evaluate_architecture(targets, preds)
-    # print("Validation accuracy: {}".format(accuracy))
     print("Mean squared error:", mse)
-
+    
+    # Optional: Write results to a csv file
     if _writeToCSV:
-        # Optional: Write results to a csv file
         with open('FM_results.csv','a') as file:
             # No. of hidden layers, no. of neurons per hidden layer, activation, batch size, learning rate, number of epochs,
-            # Accuracy, MSE
+            # MSE
             csvList = [len(neurons) - 1, neurons[0], activations[0], _activationFunctionOutput, _batchSize, 
-                _learningRate, _numberOfEpochs, accuracy, mse]
+                _learningRate, _numberOfEpochs, mse]
             csvRow = str(csvList).strip("[]")
             csvRow += "\n"
             file.write(csvRow)
@@ -79,6 +77,7 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
     #######################################################################
     # illustrate_results_FM(net, prep)
 
+# Evaluate the arhcitecture using MSE
 def evaluate_architecture(y_true, y_pred):
     return mean_squared_error(y_true, y_pred)
 
@@ -95,9 +94,9 @@ if __name__ == "__main__":
     activationHidden = "relu"          # Does not apply for input/output layer
     activationOutput = "identity"
     lossFunction = "mse"
-    batchSize = 1000
+    batchSize = 64
     learningRate = 1e-5
-    numberOfEpochs = 10000
+    numberOfEpochs = 1000
 
     # Optional: Write results to csv
     writeToCSV = False
