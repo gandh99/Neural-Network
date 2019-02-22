@@ -17,5 +17,8 @@ b = np.array([[0, 0, 0, 1], [1, 0, 0, 0]])
 # ans = ans[:, 1]
 # print(ans)
 
-ans = np.argmax(a, axis=1)
-print(ans)
+# ans = np.argmax(a, axis=1)
+# print(ans)
+
+dic = {1:1, 2:2, 4:10}
+print(len(dic))

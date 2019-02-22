@@ -64,7 +64,7 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
     # Evaluate the neural network
     preds = net(x_val_pre)
     targets = y_val
-    evaluate_architecture(targets, preds)
+    accuracy = evaluate_architecture(targets, preds)
 
     # Optional: Write results to a csv file
     if _writeToCSV:
@@ -94,22 +94,28 @@ def evaluate_architecture(y_true, y_pred):
     index = 0
     totalErrors = 0
     numOfRows = y_true.shape[0]
-    for element in labelDict:
+    for i in range(len(labelDict)):
         truePositive, falsePositive, falseNegative = calculate_metrics(confusionMatrix, index)
         recall = calculate_recall(truePositive, falseNegative)
         precision = calculate_precision(truePositive, falsePositive)
         f1 = calculate_f1(recall, precision)
         totalErrors += falsePositive
 
-        labelDict[element] = {"recall": recall, "precision": precision, "f1": f1}
+        key = "label" + str(index + 1)
+        labelDict[key] = {"recall": recall, "precision": precision, "f1": f1}
         index += 1
 
     accuracy = calculate_classification_rate(numOfRows, totalErrors)
 
     # Print results
     print(confusionMatrix)
-    print(labelDict)
+    for i in range(len(labelDict)):
+        key = "label" + str(i + 1)
+        print(key, labelDict[key])
     print("Accuracy: ", accuracy)
+
+    # Return metrics
+    return accuracy
 
     # Optional: Prints the number of occurrences of each index in y_true
     indices = np.argmax(y_true, axis=1)
