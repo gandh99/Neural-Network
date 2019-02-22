@@ -28,6 +28,12 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
     x = dataset[:, :input_dim]
     y = dataset[:, input_dim:]
 
+    # # Optional: See the breakdown of the dataset
+    # indices = np.argmax(y, axis=1)
+    # unique, counts = np.unique(indices, return_counts=True)
+    # ans = dict(zip(unique, counts))
+    # print(ans)
+
     split_idx = int(0.8 * len(x))
 
     # Split data by rows into a training set and a validation set
@@ -103,13 +109,13 @@ def evaluate_architecture(y_true, y_pred):
     # Print results
     print(confusionMatrix)
     print(labelDict)
-    print(accuracy)
+    print("Accuracy: ", accuracy)
 
     # Optional: Prints the number of occurrences of each index in y_true
     indices = np.argmax(y_true, axis=1)
     unique, counts = np.unique(indices, return_counts=True)
     ans = dict(zip(unique, counts))
-    print(ans)
+    print("Breakdown of labels in test dataset", ans)
     
 # Populates the confusion matrix based on y_true and y_pred
 def populate_confusion_matrix(y_true, y_pred):
@@ -188,13 +194,13 @@ if __name__ == "__main__":
 
     # Modify any of the following hyperparameters     
     numOfHiddenLayers = 3              # Does not count input/output layer
-    numOfNeuronsPerHiddenLayer = 5      # Configures all hidden layers to have the same number of neurons
+    numOfNeuronsPerHiddenLayer = 20      # Configures all hidden layers to have the same number of neurons
     activationHidden = "relu"          # Does not apply for input/output layer
     activationOutput = "sigmoid"
     lossFunction = "mse"
     batchSize = 64
     learningRate = 1e-3
-    numberOfEpochs = 1000
+    numberOfEpochs = 5000
 
     # Optional: Write results to csv
     writeToCSV = False
