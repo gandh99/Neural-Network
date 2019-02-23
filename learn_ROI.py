@@ -64,7 +64,14 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
     # Evaluate the neural network
     preds = net(x_val_pre)
     targets = y_val
-    accuracy = evaluate_architecture(targets, preds)
+    accuracy, confusionMatrix, labelDict = evaluate_architecture(targets, preds)
+
+    # Optional: Print results
+    print(confusionMatrix)
+    for i in range(len(labelDict)):
+        key = "label" + str(i + 1)
+        print(key, labelDict[key])
+    print("Accuracy: ", accuracy)
 
     # Optional: Write results to a csv file
     if _writeToCSV:
@@ -107,21 +114,8 @@ def evaluate_architecture(y_true, y_pred):
 
     accuracy = calculate_classification_rate(numOfRows, totalErrors)
 
-    # Print results
-    print(confusionMatrix)
-    for i in range(len(labelDict)):
-        key = "label" + str(i + 1)
-        print(key, labelDict[key])
-    print("Accuracy: ", accuracy)
-
     # Return metrics
-    return accuracy
-
-    # Optional: Prints the number of occurrences of each index in y_true
-    indices = np.argmax(y_true, axis=1)
-    unique, counts = np.unique(indices, return_counts=True)
-    ans = dict(zip(unique, counts))
-    print("Breakdown of labels in test dataset", ans)
+    return accuracy, confusionMatrix, labelDict
     
 # Populates the confusion matrix based on y_true and y_pred
 def populate_confusion_matrix(y_true, y_pred):
@@ -206,7 +200,7 @@ if __name__ == "__main__":
     lossFunction = "mse"
     batchSize = 64
     learningRate = 1e-3
-    numberOfEpochs = 5000
+    numberOfEpochs = 1000
 
     # Optional: Write results to csv
     writeToCSV = False
