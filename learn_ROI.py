@@ -28,17 +28,14 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
     x = dataset[:, :input_dim]
     y = dataset[:, input_dim:]
 
-    # # Optional: See the breakdown of the dataset
-    # indices = np.argmax(y, axis=1)
-    # unique, counts = np.unique(indices, return_counts=True)
-    # ans = dict(zip(unique, counts))
-    # print(ans)
-
     split_idx = int(0.8 * len(x))
 
-    # Split data by rows into a training set and a validation set
-    x_train = x[:split_idx]
-    y_train = y[:split_idx]
+    # Split data by rows into a training set and a validation set. We then augment the training data into the desired proportions
+    # x_train = x[:split_idx]
+    # y_train = y[:split_idx]
+    augmentedTrainingData = augment_data(dataset[:split_idx, :], input_dim, label1=0.25, label2=0.25, label3=0.25, label4=0.25)
+    x_train = augmentedTrainingData[:, :input_dim]
+    y_train = augmentedTrainingData[:, input_dim:]
     x_val = x[split_idx:]
     y_val = y[split_idx:]
 
@@ -88,6 +85,59 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
     #######################################################################
     # illustrate_results_ROI(network, prep)
 
+# Augments the data into the desired proportion
+def augment_data(dataset, inputDim, label1=0.25, label2=0.25, label3=0.25, label4=0.25):
+    # Calculate the relative proportions based on the input arguments
+    label1 /= (label1 + label2 + label3 + label4)
+    label2 /= (label1 + label2 + label3 + label4)
+    label3 /= (label1 + label2 + label3 + label4)
+    label4 /= (label1 + label2 + label3 + label4)
+    listOfLabelProportions = [label1, label2, label3, label4]
+
+    # Get the counts of each label in the input dataset and store as a dictionary (key = index, value = count)
+    indices = np.argmax(dataset[:, inputDim:], axis=1)
+    unique, counts = np.unique(indices, return_counts=True)
+    countsDict = dict(zip(unique, counts)) 
+
+    # Segregate the dataset according to the label
+    numOfRows = dataset.shape[0]
+    numOfColumns = dataset.shape[1]
+    labelData = np.empty([0, numOfColumns])
+    listOfLabelData = [labelData, labelData, labelData, labelData]      # Index 0 = label1 data, index 1 = label2 data, etc.
+    for i in range(numOfRows):
+        labelIndex = np.argmax(dataset[i, inputDim:])       # Get the index with the maximum value out of indices 0 to 3
+        listOfLabelData[labelIndex] = np.append(listOfLabelData[labelIndex], [dataset[i, :]], axis=0)
+
+    # # Sanity check to see if data was segregated correctly
+    # print("Count dict:", countsDict)
+    # print("shape:", listOfLabelData[0].shape)
+    # print("shape:", listOfLabelData[1].shape)
+    # print("shape:", listOfLabelData[2].shape)
+    # print("shape:", listOfLabelData[3].shape)
+    # print(listOfLabelData[3][0:10,:])
+
+    # Augment the dataset
+    newDataset = np.empty([0, numOfColumns])
+    for i in range(len(listOfLabelData)):
+        numOfDataNeeded = int(listOfLabelProportions[i] * numOfRows)
+        if numOfDataNeeded <= listOfLabelData[i].shape[0]:
+            newDataset = np.append(newDataset, listOfLabelData[i][:numOfDataNeeded, :], axis=0)
+        else:
+            numOfDuplicationsNeeded = int(numOfDataNeeded / listOfLabelData[i].shape[0])
+            numOfRemaindersNeeded = int(numOfDataNeeded % listOfLabelData[i].shape[0])
+            for j in range(numOfDuplicationsNeeded):
+                newDataset = np.append(newDataset, listOfLabelData[i][:, :], axis=0)
+            newDataset = np.append(newDataset, listOfLabelData[i][:numOfRemaindersNeeded, :], axis=0)
+
+    # Sanity check to see if the new dataset has the proportion we wanted
+    # print("size of new dataset: ", newDataset.shape)
+    # indices = np.argmax(newDataset[:, inputDim:], axis=1)
+    # unique, counts = np.unique(indices, return_counts=True)
+    # countsDict2 = dict(zip(unique, counts)) 
+    # print(countsDict2)
+
+    return newDataset   
+
 # First create the confusion matrix (predicted x expected)
 # Then, evaluate the architecture using accuracy, precision, recall and F1 score
 def evaluate_architecture(y_true, y_pred):
@@ -117,7 +167,7 @@ def evaluate_architecture(y_true, y_pred):
     # Return metrics
     return accuracy, confusionMatrix, labelDict
     
-# Populates the confusion matrix based on y_true and y_pred
+# Populates the confusion matrix (predicted x expected) based on y_true and y_pred
 def populate_confusion_matrix(y_true, y_pred):
     # Create an empty confusion matrix filled with 0s
     numOfRows = y_pred.shape[1]
@@ -200,7 +250,7 @@ if __name__ == "__main__":
     lossFunction = "mse"
     batchSize = 64
     learningRate = 1e-3
-    numberOfEpochs = 1000
+    numberOfEpochs = 5000
 
     # Optional: Write results to csv
     writeToCSV = False
