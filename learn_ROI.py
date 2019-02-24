@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 # Global variables to stores values that will be used for plotting
 xValues = []
-yValues = []
+yValues = [[], [], [], [], []]      # label1(f1), label2(f1), label3(f1), label4(f1), accuracy
 
 # Main function that calls other functions to train and evaluate the neural network
 def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFunction, _batchSize, _learningRate, _numberOfEpochs, _writeToCSV = False):
@@ -75,18 +75,22 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
         print(key, labelDict[key])
     print("Accuracy: ", accuracy)
 
-    # Optional: Append x and y values for plotting
+    # Optional: Append x and y values, to be plotted at the end
     global xValues, yValues
-    xValues.append(neurons[0])
-    yValues.append(accuracy)
+    xValues.append(_numberOfEpochs)
+    for i in range(len(labelDict)):
+        key = "label" + str(i + 1)
+        metric = "f1"
+        yValues[i].append(labelDict[key][metric])
+    yValues[len(labelDict) - 1].append(accuracy)
 
     # Optional: Write results to a csv file
     if _writeToCSV:
         with open('ROI_results.csv','a') as file:
             # No. of hidden layers, no. of neurons per hidden layer, activation in hidden layer, activation in output layer, 
-            # batch size, learning rate, number of epochs, accuracy
+            # batch size, learning rate, number of epochs, accuracy, confusionMatrix, labelDict
             csvList = [len(neurons) - 1, neurons[0], activations[0], _activationFunctionOutput, _batchSize, 
-                _learningRate, _numberOfEpochs, accuracy]
+                _learningRate, _numberOfEpochs, accuracy, confusionMatrix, labelDict]
             csvRow = str(csvList).strip("[]")
             csvRow += "\n"
             file.write(csvRow)
@@ -247,40 +251,47 @@ def calculate_classification_rate(numOfRows, totalErrors):
 
 # Plot a line graph of y against x
 def plot_data(x, y):
-    plt.plot(x, y, marker="x")
+    # Set the data we want to be plotted
+    for i in range(len(yValues)):
+        labelName = "Label " + str(i + 1)
+        if i == len(yValues) - 1:
+            plt.plot(x, yValues[i], marker="x", label="Accuracy")
+        else:
+            plt.plot(x, yValues[i], marker="x", label=labelName)
  
     # Set axes scales
-    plt.ylim(0.5, 1.0)
+    plt.ylim(0.0, 1.0)
 
     # Set label and title names
-    xLabel = "Number of hidden layers"
-    yLabel = "Accuracy"
+    xLabel = "Number of epochs"
+    yLabel = "F1 + Accuracy"
     plt.xlabel(xLabel)
     plt.ylabel(yLabel)
     plt.title(yLabel + " vs " + xLabel)
     plt.grid(True)
+    plt.legend()
     plt.show()
 
 
 if __name__ == "__main__":
-    for iteratedValue in range(3, 6, 1):
+    for iteratedValue in range(1000, 2001, 1000):
         # Setup for the hyperparameters for main()
         neurons = []
         activationFunctions = [] 
         outputDimension = 4
 
         # Modify any of the following hyperparameters     
-        numOfHiddenLayers = iteratedValue              # Does not count input/output layer
+        numOfHiddenLayers = 3              # Does not count input/output layer
         numOfNeuronsPerHiddenLayer = 20      # Configures all hidden layers to have the same number of neurons
         activationHidden = "relu"          # Does not apply for input/output layer
         activationOutput = "sigmoid"
         lossFunction = "mse"
         batchSize = 64
         learningRate = 1e-3
-        numberOfEpochs = 1000
+        numberOfEpochs = iteratedValue
 
         # Optional: Write results to csv
-        writeToCSV = False
+        writeToCSV = True
 
         # Optional: Set number of neurons in hidden layers based on hyperparameters
         # This results in all hidden layers having the same number of neurons (except output layer)
