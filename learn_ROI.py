@@ -9,8 +9,13 @@ from nn_lib import (
 )
 
 from illustrate import illustrate_results_ROI
+import matplotlib.pyplot as plt
 
+# Global variables to stores values that will be used for plotting
+xValues = []
+yValues = []
 
+# Main function that calls other functions to train and evaluate the neural network
 def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFunction, _batchSize, _learningRate, _numberOfEpochs, _writeToCSV = False):
     dataset = np.loadtxt("ROI_dataset.dat")
     #######################################################################
@@ -70,11 +75,16 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
         print(key, labelDict[key])
     print("Accuracy: ", accuracy)
 
+    # Optional: Append x and y values for plotting
+    global xValues, yValues
+    xValues.append(neurons[0])
+    yValues.append(accuracy)
+
     # Optional: Write results to a csv file
     if _writeToCSV:
         with open('ROI_results.csv','a') as file:
-            # No. of hidden layers, no. of neurons per hidden layer, activation, batch size, learning rate, number of epochs,
-            # Accuracy
+            # No. of hidden layers, no. of neurons per hidden layer, activation in hidden layer, activation in output layer, 
+            # batch size, learning rate, number of epochs, accuracy
             csvList = [len(neurons) - 1, neurons[0], activations[0], _activationFunctionOutput, _batchSize, 
                 _learningRate, _numberOfEpochs, accuracy]
             csvRow = str(csvList).strip("[]")
@@ -85,7 +95,7 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
     #######################################################################
     # illustrate_results_ROI(network, prep)
 
-# Augments the data into the desired proportion
+# Augments the data into the desired proportion. The size of the new dataset will be the same as the input dataset
 def augment_data(dataset, inputDim, label1=0.25, label2=0.25, label3=0.25, label4=0.25):
     # Calculate the relative proportions based on the input arguments
     label1 /= (label1 + label2 + label3 + label4)
@@ -129,7 +139,7 @@ def augment_data(dataset, inputDim, label1=0.25, label2=0.25, label3=0.25, label
                 newDataset = np.append(newDataset, listOfLabelData[i][:, :], axis=0)
             newDataset = np.append(newDataset, listOfLabelData[i][:numOfRemaindersNeeded, :], axis=0)
 
-    # Sanity check to see if the new dataset has the proportion we wanted
+    # # Sanity check to see if the new dataset has the proportion we wanted
     # print("size of new dataset: ", newDataset.shape)
     # indices = np.argmax(newDataset[:, inputDim:], axis=1)
     # unique, counts = np.unique(indices, return_counts=True)
@@ -235,37 +245,57 @@ def calculate_classification_rate(numOfRows, totalErrors):
         return 0
     return (numOfRows - totalErrors) / numOfRows
 
+# Plot a line graph of y against x
+def plot_data(x, y):
+    plt.plot(x, y, marker="x")
+ 
+    # Set axes scales
+    plt.ylim(0.5, 1.0)
+
+    # Set label and title names
+    xLabel = "Number of hidden layers"
+    yLabel = "Accuracy"
+    plt.xlabel(xLabel)
+    plt.ylabel(yLabel)
+    plt.title(yLabel + " vs " + xLabel)
+    plt.grid(True)
+    plt.show()
+
 
 if __name__ == "__main__":
-    # Setup for the hyperparameters for main()
-    neurons = []
-    activationFunctions = [] 
-    outputDimension = 4
+    for iteratedValue in range(3, 6, 1):
+        # Setup for the hyperparameters for main()
+        neurons = []
+        activationFunctions = [] 
+        outputDimension = 4
 
-    # Modify any of the following hyperparameters     
-    numOfHiddenLayers = 3              # Does not count input/output layer
-    numOfNeuronsPerHiddenLayer = 20      # Configures all hidden layers to have the same number of neurons
-    activationHidden = "relu"          # Does not apply for input/output layer
-    activationOutput = "sigmoid"
-    lossFunction = "mse"
-    batchSize = 64
-    learningRate = 1e-3
-    numberOfEpochs = 5000
+        # Modify any of the following hyperparameters     
+        numOfHiddenLayers = iteratedValue              # Does not count input/output layer
+        numOfNeuronsPerHiddenLayer = 20      # Configures all hidden layers to have the same number of neurons
+        activationHidden = "relu"          # Does not apply for input/output layer
+        activationOutput = "sigmoid"
+        lossFunction = "mse"
+        batchSize = 64
+        learningRate = 1e-3
+        numberOfEpochs = 1000
 
-    # Optional: Write results to csv
-    writeToCSV = False
+        # Optional: Write results to csv
+        writeToCSV = False
 
-    # Optional: Set number of neurons in hidden layers based on hyperparameters
-    # This results in all hidden layers having the same number of neurons (except output layer)
-    for i in range(numOfHiddenLayers):
-        neurons.append(numOfNeuronsPerHiddenLayer)
-    neurons.append(outputDimension)       # CONSTANT: For the output layer
+        # Optional: Set number of neurons in hidden layers based on hyperparameters
+        # This results in all hidden layers having the same number of neurons (except output layer)
+        for i in range(numOfHiddenLayers):
+            neurons.append(numOfNeuronsPerHiddenLayer)
+        neurons.append(outputDimension)       # CONSTANT: For the output layer
 
-    # Optional: Set activation functions in hidden layers based on hyperparameters
-    # This results in all hidden layers having the same activation functions (except output layer)
-    for i in range(numOfHiddenLayers):
-        activationFunctions.append(activationHidden)
-    activationFunctions.append(activationOutput)       # For the output layer
+        # Optional: Set activation functions in hidden layers based on hyperparameters
+        # This results in all hidden layers having the same activation functions (except output layer)
+        for i in range(numOfHiddenLayers):
+            activationFunctions.append(activationHidden)
+        activationFunctions.append(activationOutput)       # For the output layer
 
-    # Call the main function to train and evaluate the neural network
-    main(neurons, activationFunctions, activationOutput, lossFunction, batchSize, learningRate, numberOfEpochs, writeToCSV)
+        # Call the main function to train and evaluate the neural network
+        main(neurons, activationFunctions, activationOutput, lossFunction, batchSize, learningRate, numberOfEpochs, writeToCSV)
+
+    # Optional: Plot the results in a line graph
+    plot_data(xValues, yValues)
