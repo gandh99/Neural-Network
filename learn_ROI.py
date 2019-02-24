@@ -82,7 +82,7 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
         key = "label" + str(i + 1)
         metric = "f1"
         yValues[i].append(labelDict[key][metric])
-    yValues[len(labelDict) - 1].append(accuracy)
+    yValues[len(yValues) - 1].append(accuracy)
 
     # Optional: Write results to a csv file
     if _writeToCSV:
@@ -252,12 +252,12 @@ def calculate_classification_rate(numOfRows, totalErrors):
 # Plot a line graph of y against x
 def plot_data(x, y):
     # Set the data we want to be plotted
-    for i in range(len(yValues)):
+    for i in range(len(y)):
         labelName = "Label " + str(i + 1)
-        if i == len(yValues) - 1:
-            plt.plot(x, yValues[i], marker="x", label="Accuracy")
+        if i == len(y) - 1:
+            plt.plot(x, y[i], marker="x", label="Accuracy")
         else:
-            plt.plot(x, yValues[i], marker="x", label=labelName)
+            plt.plot(x, y[i], marker="x", label=labelName)
  
     # Set axes scales
     plt.ylim(0.0, 1.0)
@@ -274,7 +274,7 @@ def plot_data(x, y):
 
 
 if __name__ == "__main__":
-    for iteratedValue in range(1000, 2001, 1000):
+    for iteratedValue in range(100, 201, 100):
         # Setup for the hyperparameters for main()
         neurons = []
         activationFunctions = [] 
