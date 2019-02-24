@@ -251,9 +251,14 @@ def calculate_classification_rate(numOfRows, totalErrors):
 
 # Plot a line graph of y against x
 def plot_data(x, y):
+    # Define the box area for the main plot
+    ax = plt.subplot(111)
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+
     # Set the data we want to be plotted
     for i in range(len(y)):
-        labelName = "Label " + str(i + 1)
+        labelName = "Label " + str(i + 1) + " (f1)"
         if i == len(y) - 1:
             plt.plot(x, y[i], marker="x", label="Accuracy")
         else:
@@ -269,7 +274,10 @@ def plot_data(x, y):
     plt.ylabel(yLabel)
     plt.title(yLabel + " vs " + xLabel)
     plt.grid(True)
-    plt.legend()
+
+    # Set legend to be outside of the plot
+    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+
     plt.show()
 
 
