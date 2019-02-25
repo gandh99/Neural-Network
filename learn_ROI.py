@@ -36,11 +36,16 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
     split_idx = int(0.8 * len(x))
 
     # Split data by rows into a training set and a validation set. We then augment the training data into the desired proportions
-    # x_train = x[:split_idx]
+    # Use this for original dataset (training)
+    # x_train = x[:split_idx]       
     # y_train = y[:split_idx]
-    augmentedTrainingData = augment_data(dataset[:split_idx, :], input_dim, label1=0.25, label2=0.25, label3=0.25, label4=0.25)
+
+    # Use this for augmented dataset (training)
+    augmentedTrainingData = augment_data_oversample(dataset[:split_idx, :], input_dim, label1=0.25, label2=0.25, label3=0.25, label4=0.25)
     x_train = augmentedTrainingData[:, :input_dim]
     y_train = augmentedTrainingData[:, input_dim:]
+
+    # Validation dataset
     x_val = x[split_idx:]
     y_val = y[split_idx:]
 
@@ -77,7 +82,7 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
 
     # Optional: Append x and y values, to be plotted at the end
     global xValues, yValues
-    xValues.append(_numberOfEpochs)
+    xValues.append(len(neurons) - 1)
     for i in range(len(labelDict)):
         key = "label" + str(i + 1)
         metric = "f1"
@@ -100,7 +105,7 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
     # illustrate_results_ROI(network, prep)
 
 # Augments the data into the desired proportion. The size of the new dataset will be the same as the input dataset
-def augment_data(dataset, inputDim, label1=0.25, label2=0.25, label3=0.25, label4=0.25):
+def augment_data_balanced(dataset, inputDim, label1=0.25, label2=0.25, label3=0.25, label4=0.25):
     # Calculate the relative proportions based on the input arguments
     label1 /= (label1 + label2 + label3 + label4)
     label2 /= (label1 + label2 + label3 + label4)
@@ -151,6 +156,55 @@ def augment_data(dataset, inputDim, label1=0.25, label2=0.25, label3=0.25, label
     # print(countsDict2)
 
     return newDataset   
+
+# Augments the data into the desired proportion. The size of the new dataset will be larger than the input dataset
+# Each and every label will be oversampled relative to the size as that of the label with the largest sample size
+# No data will be shrunk/discarded
+def augment_data_oversample(dataset, inputDim, label1=0.25, label2=0.25, label3=0.25, label4=0.25):
+    # Calculate the relative proportions based on the input arguments
+    label1 /= (label1 + label2 + label3 + label4)
+    label2 /= (label1 + label2 + label3 + label4)
+    label3 /= (label1 + label2 + label3 + label4)
+    label4 /= (label1 + label2 + label3 + label4)
+    listOfLabelProportions = [label1, label2, label3, label4]
+
+    # Get the counts of each label in the input dataset and store as a dictionary (key = index, value = count)
+    indices = np.argmax(dataset[:, inputDim:], axis=1)
+    unique, counts = np.unique(indices, return_counts=True)
+    countsDict = dict(zip(unique, counts)) 
+
+    # Segregate the dataset according to the label
+    numOfRows = dataset.shape[0]
+    numOfColumns = dataset.shape[1]
+    labelData = np.empty([0, numOfColumns])
+    listOfLabelData = [labelData, labelData, labelData, labelData]      # Index 0 = label1 data, index 1 = label2 data, etc.
+    for i in range(numOfRows):
+        labelIndex = np.argmax(dataset[i, inputDim:])       # Get the index with the maximum value out of indices 0 to 3
+        listOfLabelData[labelIndex] = np.append(listOfLabelData[labelIndex], [dataset[i, :]], axis=0)
+
+    # Augment the dataset
+    minNumberOfDataKey = max(countsDict, key=lambda i: countsDict[i])   # Get the label with the most data
+    minNumberOfDataValue = countsDict[minNumberOfDataKey]
+    newDataset = np.empty([0, numOfColumns])
+    for i in range(len(listOfLabelData)):
+        numOfDataNeeded = int((listOfLabelProportions[i] / listOfLabelProportions[minNumberOfDataKey]) * countsDict[minNumberOfDataKey])
+        if numOfDataNeeded <= listOfLabelData[i].shape[0]:
+            newDataset = np.append(newDataset, listOfLabelData[i][:numOfDataNeeded, :], axis=0)
+        else:
+            numOfDuplicationsNeeded = int(numOfDataNeeded / listOfLabelData[i].shape[0])
+            numOfRemaindersNeeded = int(numOfDataNeeded % listOfLabelData[i].shape[0])
+            for j in range(numOfDuplicationsNeeded):
+                newDataset = np.append(newDataset, listOfLabelData[i][:, :], axis=0)
+            newDataset = np.append(newDataset, listOfLabelData[i][:numOfRemaindersNeeded, :], axis=0)
+
+    # # Sanity check to see if the new dataset has the proportion we wanted
+    # print("size of new dataset: ", newDataset.shape)
+    # indices = np.argmax(newDataset[:, inputDim:], axis=1)
+    # unique, counts = np.unique(indices, return_counts=True)
+    # countsDictNew = dict(zip(unique, counts)) 
+    # print("new dataset: ", countsDictNew)
+
+    return newDataset  
 
 # First create the confusion matrix (predicted x expected)
 # Then, evaluate the architecture using accuracy, precision, recall and F1 score
@@ -268,7 +322,7 @@ def plot_data(x, y):
     plt.ylim(0.0, 1.0)
 
     # Set label and title names
-    xLabel = "Number of epochs"
+    xLabel = "Number of hidden layers"
     yLabel = "F1 + Accuracy"
     plt.xlabel(xLabel)
     plt.ylabel(yLabel)
@@ -282,7 +336,7 @@ def plot_data(x, y):
 
 
 if __name__ == "__main__":
-    for iteratedValue in range(100, 201, 100):
+    for iteratedValue in range(100, 1100, 100):
         # Setup for the hyperparameters for main()
         neurons = []
         activationFunctions = [] 
@@ -299,7 +353,7 @@ if __name__ == "__main__":
         numberOfEpochs = iteratedValue
 
         # Optional: Write results to csv
-        writeToCSV = True
+        writeToCSV = False
 
         # Optional: Set number of neurons in hidden layers based on hyperparameters
         # This results in all hidden layers having the same number of neurons (except output layer)
