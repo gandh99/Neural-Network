@@ -74,15 +74,11 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
     accuracy, confusionMatrix, labelDict = evaluate_architecture(targets, preds)
 
     # Optional: Print results
-    print(confusionMatrix)
-    for i in range(len(labelDict)):
-        key = "label" + str(i + 1)
-        print(key, labelDict[key])
-    print("Accuracy: ", accuracy)
+    print_results(confusionMatrix, labelDict, accuracy)
 
     # Optional: Append x and y values, to be plotted at the end
     global xValues, yValues
-    xValues.append(len(neurons) - 1)
+    xValues.append(neurons[0])
     for i in range(len(labelDict)):
         key = "label" + str(i + 1)
         metric = "f1"
@@ -303,6 +299,14 @@ def calculate_classification_rate(numOfRows, totalErrors):
         return 0
     return (numOfRows - totalErrors) / numOfRows
 
+# Prints the metrics
+def print_results(confusionMatrix, labelDict, accuracy):
+    print(confusionMatrix)
+    for i in range(len(labelDict)):
+        key = "label" + str(i + 1)
+        print(key, labelDict[key])
+    print("Accuracy: ", accuracy)
+
 # Plot a line graph of y against x
 def plot_data(x, y):
     # Define the box area for the main plot
@@ -322,7 +326,7 @@ def plot_data(x, y):
     plt.ylim(0.0, 1.0)
 
     # Set label and title names
-    xLabel = "Number of hidden layers"
+    xLabel = "Number of neurons per hidden layer (X hidden layers)"
     yLabel = "F1 + Accuracy"
     plt.xlabel(xLabel)
     plt.ylabel(yLabel)
@@ -336,7 +340,7 @@ def plot_data(x, y):
 
 
 if __name__ == "__main__":
-    for iteratedValue in range(100, 1100, 100):
+    for iteratedValue in range(10, 51, 5):
         # Setup for the hyperparameters for main()
         neurons = []
         activationFunctions = [] 
@@ -344,16 +348,16 @@ if __name__ == "__main__":
 
         # Modify any of the following hyperparameters     
         numOfHiddenLayers = 3              # Does not count input/output layer
-        numOfNeuronsPerHiddenLayer = 20      # Configures all hidden layers to have the same number of neurons
+        numOfNeuronsPerHiddenLayer = iteratedValue      # Configures all hidden layers to have the same number of neurons
         activationHidden = "relu"          # Does not apply for input/output layer
         activationOutput = "sigmoid"
         lossFunction = "mse"
         batchSize = 64
         learningRate = 1e-3
-        numberOfEpochs = iteratedValue
+        numberOfEpochs = 10
 
         # Optional: Write results to csv
-        writeToCSV = False
+        writeToCSV = True
 
         # Optional: Set number of neurons in hidden layers based on hyperparameters
         # This results in all hidden layers having the same number of neurons (except output layer)
