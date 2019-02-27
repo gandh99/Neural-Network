@@ -24,6 +24,25 @@ def create_confusion_matrix(numOfRows, numOfColumns):
 
     return matrix
 
+# Given a matrix of values, returns as an array the indices of the maximum value for each row
+# E.g. [0, 1, 0, 0] returns 1
+def extract_indices(data):
+    indices = np.argmax(data, axis=1)
+
+    return indices
+
+# Performs one-hot encoding on the output
+def one_hot_encode(output, numOfPossibleLabels):
+    indices = extract_indices(output)
+    encodedOutput = np.empty([0, numOfPossibleLabels])
+
+    for i in range(indices.shape[0]):
+        newRow = np.zeros((1, numOfPossibleLabels))
+        newRow[:, indices[i]] = 1
+        encodedOutput = np.append(encodedOutput, newRow, axis=0)
+
+    return encodedOutput    
+    
 # Metric: true positive, false positive, false negative
 def calculate_metrics(matrix, index):
     numOfRows = matrix.shape[0]

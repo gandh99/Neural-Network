@@ -99,7 +99,7 @@ def main(_neurons, _activationFunctionHidden, _activationFunctionOutput, _lossFu
             file.write(csvRow)
 
     # Optional: Save the network
-    save_network(net, "trained_ROI")
+    # save_network(net, "trained_ROI")
     #######################################################################
     #                       ** END OF YOUR CODE **
     #######################################################################
@@ -134,12 +134,27 @@ def evaluate_architecture(y_true, y_pred):
     # Return metrics
     return accuracy, confusionMatrix, labelDict
 
-# Given a matrix of values, returns as an array the indices of the maximum value for each row
-# E.g. [0, 1, 0, 0] returns 1
-def extract_indices(data):
-    indices = np.argmax(data, axis=1)
+# Given a set of input data, the function uses the trained neural network to generate a set of predictions
+def predict_hidden(inputData):
+    filePath = "trained_ROI.pickle"
+    input_dim = 3
 
-    return indices
+    # Pre-process data
+    xData = inputData[:, :input_dim]
+    yData = inputData[:, input_dim:]
+    prep_input = Preprocessor(xData)
+    x_data_pre = prep_input.apply(xData)
+
+    # Load the network
+    net = load_network(filePath)
+
+    # Generate the output
+    preds = net(x_data_pre)
+    oneHotEncoding = one_hot_encode(preds, preds.shape[1])
+
+    # Optional: Evaluate the output
+    # accuracy, confusionMatrix, labelDict = evaluate_architecture(yData, oneHotEncoding)
+    # print_results(confusionMatrix, labelDict, accuracy)
 
 # Prints the metrics
 def print_results(confusionMatrix, labelDict, accuracy):
