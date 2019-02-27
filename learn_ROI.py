@@ -156,6 +156,8 @@ def predict_hidden(inputData):
     # accuracy, confusionMatrix, labelDict = evaluate_architecture(yData, oneHotEncoding)
     # print_results(confusionMatrix, labelDict, accuracy)
 
+    return oneHotEncoding
+
 # Prints the metrics
 def print_results(confusionMatrix, labelDict, accuracy):
     print(confusionMatrix)
